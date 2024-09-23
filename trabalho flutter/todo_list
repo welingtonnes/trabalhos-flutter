@@ -1,0 +1,111 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(TodoApp());
+}
+
+class TodoApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Lista de Tarefas',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: TodoList(),
+    );
+  }
+}
+
+class TodoList extends StatefulWidget {
+  @override
+  _TodoListState createState() => _TodoListState();
+}
+
+class _TodoListState extends State<TodoList> {
+  final List<Map<String, dynamic>> _tasks = [];
+
+  final TextEditingController _taskController = TextEditingController();
+
+  void _addTask() {
+    if (_taskController.text.isNotEmpty) {
+      setState(() {
+        _tasks.add({
+          'task': _taskController.text,
+          'completed': false,
+        });
+      });
+      _taskController.clear();
+    }
+  }
+
+  void _toggleTaskCompletion(int index) {
+    setState(() {
+      _tasks[index]['completed'] = !_tasks[index]['completed'];
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Lista de Tarefas'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: <Widget>[
+            TextField(
+              controller: _taskController,
+              decoration: InputDecoration(
+                labelText: 'Nova Tarefa',
+              ),
+              onSubmitted: (_) => _addTask(),
+            ),
+            SizedBox(height: 20),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _tasks.length,
+                itemBuilder: (context, index) {
+                  return TaskItem(
+                    task: _tasks[index]['task'],
+                    completed: _tasks[index]['completed'],
+                    onChanged: () => _toggleTaskCompletion(index),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addTask,
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class TaskItem extends StatelessWidget {
+  final String task;
+  final bool completed;
+  final VoidCallback onChanged;
+
+  TaskItem({required this.task, required this.completed, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(
+        task,
+        style: TextStyle(
+          decoration: completed ? TextDecoration.lineThrough : TextDecoration.none,
+        ),
+      ),
+      trailing: Checkbox(
+        value: completed,
+        onChanged: (value) => onChanged(),
+      ),
+    );
+  }
+}
